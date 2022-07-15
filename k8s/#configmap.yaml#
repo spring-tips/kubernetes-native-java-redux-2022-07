@@ -1,5 +1,0 @@
-
-
-  namespace: default
-data:
-  server.port: 8050

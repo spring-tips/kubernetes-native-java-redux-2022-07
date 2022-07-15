@@ -1,7 +1,7 @@
 apiVersion: v1
+data:
+  application.properties: message=Ninhao!
 kind: ConfigMap
 metadata:
   name: edge
-data:
-  application.properties: |-
-    message=Ninhao ma?
+  
