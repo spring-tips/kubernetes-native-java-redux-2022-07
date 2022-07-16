@@ -1,7 +1,6 @@
 package com.example.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
@@ -17,9 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Flux;
 
-import java.util.Objects;
-
-@Slf4j
 @SpringBootApplication
 public class ServiceApplication {
 
@@ -29,7 +25,7 @@ public class ServiceApplication {
 
     @Bean
     ApplicationListener<AvailabilityChangeEvent<?>> availabilityChangeEventApplicationListener() {
-        return event -> log.info(event.getState() + ":" + Objects.requireNonNull(event.getResolvableType()));
+        return event -> System.out.println(event.getResolvableType() + ":" + event.getState());
     }
 
     @Bean
@@ -37,8 +33,9 @@ public class ServiceApplication {
         return event -> Flux.just("Yuxin", "Zhouyue", "Mùchén", "Ruòxī")
                 .map(name -> new Customer(null, name))
                 .flatMap(customerRepository::save)
-                .subscribe(l -> log.info(l.toString()));
+                .subscribe(System.out::println);
     }
+
 }
 
 @Controller
@@ -48,14 +45,14 @@ class AvailabilityHttpController {
 
     private final ApplicationContext context;
 
-    @GetMapping("/slow")
-    void sleep() throws Exception {
-        Thread.sleep(20_000);
-    }
-
     @GetMapping("/down")
     void down() {
         AvailabilityChangeEvent.publish(this.context, LivenessState.BROKEN);
+    }
+
+    @GetMapping("/slow")
+    void slow() throws Exception {
+        Thread.sleep(10_000);
     }
 }
 
@@ -64,11 +61,11 @@ class AvailabilityHttpController {
 @RequiredArgsConstructor
 class CustomerHttpController {
 
-    private final CustomerRepository customerRepository;
+    private final CustomerRepository repository;
 
     @GetMapping("/customers")
-    Flux<Customer> customers() {
-        return this.customerRepository.findAll();
+    Flux<Customer> get() {
+        return this.repository.findAll();
     }
 }
 
